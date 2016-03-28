@@ -15,3 +15,6 @@ Arrow keys to move a round, 'z' and 'x' to zoom, 'a' and 's' in increase/decreas
 ![](https://cloud.githubusercontent.com/assets/5236109/14068931/48d78090-f489-11e5-8e93-668d48d43fd2.png)
 ![](https://cloud.githubusercontent.com/assets/5236109/14068937/70efc376-f489-11e5-9cd7-80f37cf2a391.png)
 ![](https://cloud.githubusercontent.com/assets/5236109/14068940/931a2e5a-f489-11e5-8e1e-78e2c80e1f43.png)
+
+###Known issues
+When the zoom or detail level is high, there is a fair bit of screen tearing. The benefit of this is that overall on most machines, the image takes less time to render. I need to spend some time fiddling with using SDL2 properly and double buffering the screen.
