@@ -139,13 +139,17 @@ func handleInput() {
 	}
 
 	if keyState[sdl.K_a] {
+		renderMutex.Lock()
 		maxIterations += 1
+		renderMutex.Unlock()
 	}
 	if keyState[sdl.K_s] {
+		renderMutex.Lock()
 		maxIterations -= 1
-	}
-	if maxIterations < 1 {
-		maxIterations = 1
+		if maxIterations < 1 {
+			maxIterations = 1
+		}
+		renderMutex.Unlock()
 	}
 
 	if keyState[sdl.K_SPACE] {
