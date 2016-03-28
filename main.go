@@ -2,6 +2,7 @@ package main
 
 import (
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -33,6 +34,9 @@ var (
 
 	gridX = 1
 	gridY = 1
+
+	renderMutex = sync.Mutex{}
+	wg          = sync.WaitGroup{}
 )
 
 type Colour struct {
@@ -99,8 +103,15 @@ func renderToSurface(brotSurface BrotSurface) {
 }
 
 func eventPoll(eventChan chan sdl.Event) {
+	wg.Add(1)
+	defer wg.Done()
+
 	for event := sdl.WaitEvent(); event != nil; event = sdl.WaitEvent() {
 		eventChan <- event
+
+		if !running {
+			break
+		}
 	}
 }
 
@@ -138,9 +149,12 @@ func handleInput() {
 	}
 
 	if keyState[sdl.K_SPACE] {
+		renderMutex.Lock()
 		moveX = -0.5
 		moveY = 0.0
 		zoom = 1.0
+		maxIterations = 32
+		renderMutex.Unlock()
 	}
 }
 
@@ -221,7 +235,7 @@ func main() {
 	sdl.Init(sdl.INIT_EVERYTHING)
 
 	window, err := sdl.CreateWindow("mandelbrot", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		800, 600, sdl.WINDOW_SHOWN)
+		windowWidth, windowHeight, sdl.WINDOW_SHOWN)
 	defer window.Destroy()
 
 	windowSurface, err := window.GetSurface()
@@ -253,17 +267,15 @@ func main() {
 
 	eventChannel := make(chan sdl.Event)
 	go eventPoll(eventChannel)
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
 
-	for running {
-		select {
-		case event := <-eventChannel:
-			handleEvent(&event)
-			break
-		case <-time.NewTicker(16 * time.Millisecond).C:
+		for range time.Tick(16 * time.Millisecond) {
+			renderMutex.Lock()
 			for i := 0; i < gridX*gridY; i++ {
 				go renderToSurface(brotSurfaces[i])
 			}
-
 			for i := 0; i < gridX*gridY; i++ {
 				brotSurface := <-brotSurfaceChannel
 				brotSurface.surface.Blit(
@@ -272,11 +284,26 @@ func main() {
 					&sdl.Rect{brotSurface.x, brotSurface.y, brotSurface.width, brotSurface.height},
 				)
 			}
+			renderMutex.Unlock()
 			window.UpdateSurface()
+
+			if !running {
+				return
+			}
+		}
+	}()
+
+	for running {
+		select {
+		case event := <-eventChannel:
+			handleEvent(&event)
+			break
+		case <-time.NewTicker(16 * time.Millisecond).C:
 			handleInput()
 			break
 		}
 	}
 
+	wg.Wait()
 	sdl.Quit()
 }
