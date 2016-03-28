@@ -13,6 +13,7 @@ var (
 		"fire":          fire,
 		"full-spectrum": fullSpectrum,
 		"leaf":          leaf,
+		"water":         water,
 	}
 )
 
@@ -24,7 +25,14 @@ func init() {
 
 	if themeFunc, ok := themes[colourTheme]; ok {
 		themeFunc()
+	} else {
+		fullSpectrum()
 	}
+}
+
+func water() {
+	addColourRange(Colour{0, 0, 0}, Colour{0, 191, 255}, 4)
+	addColourRange(Colour{0, 191, 255}, Colour{0, 0, 0}, 4)
 }
 
 func leaf() {
