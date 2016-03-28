@@ -35,15 +35,9 @@ var (
 	gridX = 1
 	gridY = 1
 
-	renderMutex = sync.Mutex{}
-	wg          = sync.WaitGroup{}
+	maxIterationsMutex = sync.Mutex{}
+	wg                 = sync.WaitGroup{}
 )
-
-type Colour struct {
-	r, g, b int
-}
-
-var colours []Colour
 
 type BrotSurface struct {
 	surface       *sdl.Surface
@@ -66,6 +60,7 @@ func renderToSurface(brotSurface BrotSurface) {
 	halfZoomHeight := halfZoom * float64(windowHeight)
 	pixels := surface.Pixels()
 	pixelIndex := 0
+	localMaxIterations := maxIterations
 
 	for y := beginY; y < beginY+height; y++ {
 		for x := beginX; x < beginX+width; x++ {
@@ -78,23 +73,23 @@ func renderToSurface(brotSurface BrotSurface) {
 			oldIm := 0.0
 
 			i := 0
-			for ; i < maxIterations; i++ {
+			for ; i < localMaxIterations; i++ {
 				oldRe = newRe
 				oldIm = newIm
 
 				newRe = oldRe*oldRe - oldIm*oldIm + pr
 				newIm = 2*oldRe*oldIm + pi
 				if (newRe*newRe + newIm*newIm) > 4 {
-					i += 1
 					break
 				}
 			}
 
-			colourIndex := int(float64(len(colours))*(float64(i)/float64(maxIterations))) - 1
+			colourIndexFactor := float64(i) / float64(localMaxIterations)
+			colourIndex := int(float64(len(colours)-1) * colourIndexFactor)
 			colour := colours[colourIndex]
-			pixels[pixelIndex+0] = byte(colour.r)
+			pixels[pixelIndex+0] = byte(colour.b)
 			pixels[pixelIndex+1] = byte(colour.g)
-			pixels[pixelIndex+2] = byte(colour.b)
+			pixels[pixelIndex+2] = byte(colour.r)
 			pixelIndex += 4
 		}
 	}
@@ -139,26 +134,24 @@ func handleInput() {
 	}
 
 	if keyState[sdl.K_a] {
-		renderMutex.Lock()
-		maxIterations += 1
-		renderMutex.Unlock()
+		incMaxIterations(1)
 	}
 	if keyState[sdl.K_s] {
-		renderMutex.Lock()
-		maxIterations -= 1
-		if maxIterations < 1 {
-			maxIterations = 1
-		}
-		renderMutex.Unlock()
+		incMaxIterations(-1)
 	}
 
 	if keyState[sdl.K_SPACE] {
-		renderMutex.Lock()
 		moveX = -0.5
 		moveY = 0.0
 		zoom = 1.0
 		maxIterations = 32
-		renderMutex.Unlock()
+	}
+}
+
+func incMaxIterations(value int) {
+	maxIterations += value
+	if maxIterations < 1 {
+		maxIterations = 1
 	}
 }
 
@@ -183,48 +176,6 @@ func maxParallelism() int {
 		return maxProcs
 	}
 	return numCPU
-}
-
-func init() {
-	// 0, 0, 0 -> 0, 0, 255
-	for i := 0; i < 255; i++ {
-		colours = append(colours, Colour{0, 0, 255})
-	}
-
-	// 0, 0, 255 -> 255, 0, 255
-	for i := 0; i < 255; i++ {
-		colours = append(colours, Colour{i, 0, 255})
-	}
-
-	// 255, 0, 255 -> 255, 0, 0
-	for i := 255; i > 0; i-- {
-		colours = append(colours, Colour{255, 0, i})
-	}
-
-	// 255, 0, 0 -> 255, 255, 0
-	for i := 0; i < 255; i++ {
-		colours = append(colours, Colour{255, i, 0})
-	}
-
-	// 255, 255, 0 -> 0, 255, 0
-	for i := 255; i > 0; i-- {
-		colours = append(colours, Colour{i, 255, 0})
-	}
-
-	// 0, 255, 0 -> 0, 255, 255
-	for i := 0; i < 255; i++ {
-		colours = append(colours, Colour{0, 255, i})
-	}
-
-	// 0, 255, 255 -> 0, 0, 255
-	for i := 255; i > 0; i-- {
-		colours = append(colours, Colour{0, i, 255})
-	}
-
-	// 0, 0, 255 -> 0, 0, 0
-	for i := 255; i > 0; i-- {
-		colours = append(colours, Colour{0, 0, i})
-	}
 }
 
 func initParallelism() {
@@ -276,7 +227,6 @@ func main() {
 		defer wg.Done()
 
 		for range time.Tick(16 * time.Millisecond) {
-			renderMutex.Lock()
 			for i := 0; i < gridX*gridY; i++ {
 				go renderToSurface(brotSurfaces[i])
 			}
@@ -288,7 +238,6 @@ func main() {
 					&sdl.Rect{brotSurface.x, brotSurface.y, brotSurface.width, brotSurface.height},
 				)
 			}
-			renderMutex.Unlock()
 			window.UpdateSurface()
 
 			if !running {
