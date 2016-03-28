@@ -1,6 +1,9 @@
 package main
 
-import "os"
+import (
+	"math/rand"
+	"os"
+)
 
 type Colour struct {
 	r, g, b int
@@ -15,6 +18,7 @@ var (
 		"leaf":          leaf,
 		"water":         water,
 		"beach":         beach,
+		"random":        random,
 	}
 )
 
@@ -28,6 +32,16 @@ func init() {
 		themeFunc()
 	} else {
 		fullSpectrum()
+	}
+}
+
+func random() {
+	for i := 0; i < 512; i++ {
+		colours = append(colours, Colour{
+			rand.Intn(255),
+			rand.Intn(255),
+			rand.Intn(255),
+		})
 	}
 }
 
