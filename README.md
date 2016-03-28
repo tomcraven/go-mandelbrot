@@ -9,12 +9,14 @@ go get https://github.com/veandco/go-sdl2
 
 ###Run
 ```
-go run *.go <theme-name>
+go run *.go [theme-name]
+e.g.
+go run *.go fire
 ```
 Where ```theme-name``` is one of the themes in colour.go, currently:
-* full-spectrum
-* fire
-* leaf
+* ```full-spectrum```
+* ```fire```
+* ```leaf```
 
 ###Usage
 Arrow keys to move a round, 'z' and 'x' to zoom, 'a' and 's' in increase/decrease the level of detail
