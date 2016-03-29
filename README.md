@@ -4,7 +4,8 @@ A version of the mandelbrot set in Go
 ###Installation
 ```
 sudo apt-get install libsdl2-dev
-go get https://github.com/veandco/go-sdl2
+go get github.com/veandco/go-sdl2
+go get github.com/tomcraven/go-mandelbrot
 ```
 
 ###Run
