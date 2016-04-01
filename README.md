@@ -10,7 +10,7 @@ go get github.com/tomcraven/go-mandelbrot
 
 ###Run
 ```
-go run *.go [theme-name]
+go run *.go [optional: theme-name]
 e.g.
 go run *.go fire
 ```
