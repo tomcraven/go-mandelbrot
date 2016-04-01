@@ -46,8 +46,8 @@ func random() {
 }
 
 func beach() {
-	addColourRange(Colour{0, 0, 0}, Colour{0, 191, 255}, 4)
-	addColourRange(Colour{0, 191, 255}, Colour{239, 255, 94}, 3)
+	addColourRange(Colour{0, 0, 0}, Colour{39, 90, 99}, 4)
+	addColourRange(Colour{39, 90, 99}, Colour{239, 255, 95}, 5)
 	addColourRange(Colour{239, 255, 94}, Colour{39, 90, 99}, 5)
 	addColourRange(Colour{39, 90, 99}, Colour{0, 0, 0}, 10)
 }
