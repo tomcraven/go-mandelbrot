@@ -18,6 +18,9 @@ Where ```theme-name``` is one of the themes in colour.go, currently:
 * ```full-spectrum```
 * ```fire```
 * ```leaf```
+* ```water```
+* ```beach``` (default)
+* ```random```
 
 ###Usage
 Arrow keys to move a round, 'z' and 'x' to zoom, 'a' and 's' in increase/decrease the level of detail
