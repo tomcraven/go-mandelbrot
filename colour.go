@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	colourTheme := "full-spectrum"
+	colourTheme := "beach"
 	if len(os.Args) > 1 {
 		colourTheme = os.Args[1]
 	}
