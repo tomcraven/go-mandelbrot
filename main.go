@@ -186,7 +186,7 @@ func maxParallelism() int {
 func initParallelism() {
 	numCpus := maxParallelism()
 	runtime.GOMAXPROCS(numCpus)
-	gridX = numCpus
+	gridX = 1
 	gridY = numCpus
 }
 
