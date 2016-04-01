@@ -147,6 +147,10 @@ func handleInput() {
 		zoom = 1.0
 		maxIterations = 32
 	}
+
+	if keyState[sdl.K_RETURN] {
+		fmt.Println("[", moveX, ",", moveY, "] @", zoom, maxIterations)
+	}
 }
 
 func incMaxIterations(value int) {
