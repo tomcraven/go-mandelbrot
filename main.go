@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"runtime"
 	"sync"
 	"time"
 
-	"github.com/veandco/go-sdl2/sdl"
+	sdl "github.com/veandco/go-sdl2/sdl"
 )
 
 const (
